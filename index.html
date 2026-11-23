@@ -895,7 +895,7 @@
         // Prévenir l'utilisation de Verr Maj (CapsLock) pour passer en majuscules
         if (e.key === 'CapsLock' && CONFIG_ENSEIGNANT.bloquerCapsLockPourMajuscules) {
           e.preventDefault();
-          feedbackMessage.textContent = "🔒 Utilise la touche Maj (Shift) plutôt que Verr Maj pour les majuscules !";
+          feedbackMessage.textContent = "🔒 Utilise la touche Maj (Shift) JAMAIS JAMAIS la touche Verr Maj pour les majuscules !";
           feedbackMessage.className = "h-6 mt-3 text-sm font-bold text-amber-600 flex items-center gap-1";
         }
 
