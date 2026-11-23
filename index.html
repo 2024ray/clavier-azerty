@@ -1,1 +1,1003 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Votre Super Prof Mr Durand vous Propose cet entraînement du Clavier AZERTY - Jeu Éducatif</title>
+  <!-- Tailwind CSS CDN pour un style moderne et responsive -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts - Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-mono-code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Keycap styles */
+    .key-cap {
+      transition: all 0.12s ease-out;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1);
+      user-select: none;
+    }
+    .key-cap:active, .key-pressed {
+      transform: translateY(3px) !important;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.2) !important;
+      background-color: #3b82f6 !important;
+      color: white !important;
+      border-color: #2563eb !important;
+    }
+    .key-target {
+      animation: pulse-target 1.4s infinite alternate;
+      border-color: #2563eb !important;
+      background-color: #dbeafe !important;
+      color: #1e40af !important;
+      font-weight: 700;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5), 0 4px 0 rgba(0,0,0,0.15) !important;
+    }
+    .key-modifier-target {
+      animation: pulse-modifier 1.2s infinite alternate;
+      border-color: #7c3aed !important;
+      background-color: #f3e8ff !important;
+      color: #6b21a8 !important;
+      font-weight: 700;
+      box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.5), 0 4px 0 rgba(0,0,0,0.15) !important;
+    }
+    .key-wrong {
+      background-color: #ef4444 !important;
+      color: white !important;
+      border-color: #dc2626 !important;
+      animation: shake 0.3s ease-in-out;
+    }
+    .key-correct-hit {
+      background-color: #10b981 !important;
+      color: white !important;
+      border-color: #059669 !important;
+    }
 
+    @keyframes pulse-target {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.05); }
+    }
+    @keyframes pulse-modifier {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.03); }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-4px); }
+      40%, 80% { transform: translateX(4px); }
+    }
+    @keyframes pop-success {
+      0% { transform: scale(0.9); opacity: 0.5; }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: pop-success 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col text-slate-800">
+
+  <!-- Entête de l'application -->
+  <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-xl shadow-md">
+          ⌨️
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-slate-900 leading-tight">Clavier AZERTY De Votra Super Prof Mr DURAND</h1>
+          <p class="text-xs text-slate-500 font-medium">Jeu d'entraînement et d'apprentissage de la saisie</p>
+        </div>
+      </div>
+
+      <!-- Commandes Enseignant / Élève -->
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-lg border border-slate-200 text-xs sm:text-sm">
+          <label for="select-level" class="font-semibold text-slate-600 pl-1">Palier :</label>
+          <select id="select-level" class="bg-white text-slate-800 border border-slate-300 rounded-md px-2 py-1 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <!-- Rempli dynamiquement via JS -->
+          </select>
+        </div>
+
+        <button id="btn-toggle-keyboard" class="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 shadow-sm transition flex items-center gap-1.5">
+          <span id="icon-keyboard">👁️</span>
+          <span id="text-toggle-keyboard">Masquer le clavier</span>
+        </button>
+
+        <button id="btn-restart" class="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition flex items-center gap-1.5">
+          🔄 Recommencer
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Zone Principale / Dashboard -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
+
+    <!-- Barre de Progression et Statistiques -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-col gap-4">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <span id="badge-level" class="inline-block px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 mb-1">
+            Niveau
+          </span>
+          <h2 id="current-level-title" class="text-lg font-bold text-slate-800">
+            Minuscules simples
+          </h2>
+        </div>
+
+        <div class="flex items-center gap-4 sm:gap-8 text-center">
+          <div>
+            <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Score</div>
+            <div id="stat-score" class="text-2xl font-black text-blue-600">0</div>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Réussites</div>
+            <div id="stat-success" class="text-2xl font-black text-emerald-600">0</div>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Erreurs</div>
+            <div id="stat-errors" class="text-2xl font-black text-rose-500">0</div>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Précision</div>
+            <div id="stat-accuracy" class="text-2xl font-black text-slate-700">100%</div>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Note / 20</div>
+            <div id="stat-grade" class="text-2xl font-black text-indigo-600">0/20</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barre de progression -->
+      <div class="space-y-1">
+        <div class="flex justify-between text-xs font-semibold text-slate-500">
+          <span>Progression</span>
+          <span id="stat-progress-text">1 / 50</span>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden border border-slate-200">
+          <div id="progress-bar" class="bg-blue-600 h-full rounded-full transition-all duration-300" style="width: 2%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zone de Saisie Interactive -->
+    <div id="arena-card" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center relative overflow-hidden transition-all">
+      
+      <!-- Instruction & Aide sur la combinaison -->
+      <div id="instruction-banner" class="mb-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-sm font-semibold">
+        💡 <span id="instruction-text">Tape la touche correspondante</span>
+      </div>
+
+      <!-- Grande Carte Caractère Cible -->
+      <div class="relative my-2">
+        <div id="target-char-display" class="w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-slate-50 to-slate-100 rounded-3xl border-4 border-slate-300 shadow-inner flex items-center justify-center text-6xl sm:text-7xl font-black text-slate-900 font-mono-code transition-all">
+          a
+        </div>
+      </div>
+
+      <!-- Indicateur de saisie en direct -->
+      <div class="mt-4 flex flex-col items-center gap-2">
+        <div class="text-xs text-slate-400 font-bold uppercase tracking-widest">Dernière touche saisie</div>
+        <div id="user-input-display" class="h-10 px-4 min-w-[80px] bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-center font-mono-code text-xl font-bold text-slate-600">
+          -
+        </div>
+      </div>
+
+      <!-- Message de retour instantané -->
+      <div id="feedback-message" class="h-6 mt-3 text-sm font-bold text-slate-500 flex items-center gap-1">
+        Appuie sur les touches de ton clavier
+      </div>
+
+      <!-- Champ input invisible pour capter le focus universel (notamment mobiles / tablettes) -->
+      <input type="text" id="hidden-input" class="opacity-0 absolute -z-10 w-1 h-1" autocomplete="off" capitalize="off" spellcheck="false" />
+    </div>
+
+    <!-- Schéma du Clavier AZERTY Visuel -->
+    <div id="keyboard-container" class="bg-slate-800 p-3 sm:p-5 rounded-2xl shadow-lg border border-slate-700 flex flex-col gap-2 transition-all duration-300">
+      <div class="flex justify-between items-center px-1 mb-1">
+        <div class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+          <span>Clavier AZERTY Français</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        </div>
+        <div class="text-xs text-slate-400">
+          <span class="inline-block w-3 h-3 rounded bg-blue-500 align-middle mr-1"></span> Touche cible
+          <span class="inline-block w-3 h-3 rounded bg-purple-500 align-middle ml-3 mr-1"></span> Touche modificateurs (Maj / Alt Gr)
+        </div>
+      </div>
+
+      <!-- Disposition AZERTY complète -->
+      <div id="azerty-keyboard" class="flex flex-col gap-1.5 w-full select-none font-mono-code">
+        <!-- Rangée 0 : Touches Numériques / Symboles haut -->
+        <div class="flex gap-1 sm:gap-1.5 w-full">
+          <div data-key="²" id="key-twosuper" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-2 text-center text-xs sm:text-sm font-semibold border border-slate-600">²</div>
+          <div data-key="1" id="key-1" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>1</span><span class="text-[10px] text-slate-400">&amp;</span></div>
+          <div data-key="2" id="key-2" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>2 ~</span><span class="text-[10px] text-slate-400">é</span></div>
+          <div data-key="3" id="key-3" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>3 #</span><span class="text-[10px] text-slate-400">"</span></div>
+          <div data-key="4" id="key-4" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>4 {</span><span class="text-[10px] text-slate-400">'</span></div>
+          <div data-key="5" id="key-5" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>5 [</span><span class="text-[10px] text-slate-400">(</span></div>
+          <div data-key="6" id="key-6" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>6 |</span><span class="text-[10px] text-slate-400">-</span></div>
+          <div data-key="7" id="key-7" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>7 `</span><span class="text-[10px] text-slate-400">è</span></div>
+          <div data-key="8" id="key-8" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>8 \</span><span class="text-[10px] text-slate-400">_</span></div>
+          <div data-key="9" id="key-9" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>9 ^</span><span class="text-[10px] text-slate-400">ç</span></div>
+          <div data-key="0" id="key-0" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>0 @</span><span class="text-[10px] text-slate-400">à</span></div>
+          <div data-key=")" id="key-paren" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>° ]</span><span class="text-[10px] text-slate-400">)</span></div>
+          <div data-key="=" id="key-equal" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>+ }</span><span class="text-[10px] text-slate-400">=</span></div>
+          <div id="key-Backspace" class="key-cap flex-[1.5] bg-slate-700 text-slate-300 rounded-lg p-2 text-center text-xs font-semibold border border-slate-600 flex items-center justify-center">⌫</div>
+        </div>
+
+        <!-- Rangée 1 : A Z E R T Y... -->
+        <div class="flex gap-1 sm:gap-1.5 w-full">
+          <div id="key-Tab" class="key-cap flex-[1.4] bg-slate-700 text-slate-300 rounded-lg p-2 text-left text-xs font-semibold border border-slate-600 flex items-center pl-2">Tab</div>
+          <div data-key="A" id="key-A" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">A</div>
+          <div data-key="Z" id="key-Z" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">Z</div>
+          <div data-key="E" id="key-E" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-1 sm:p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>E</span><span class="text-[10px] text-emerald-400">€</span></div>
+          <div data-key="R" id="key-R" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">R</div>
+          <div data-key="T" id="key-T" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">T</div>
+          <div data-key="Y" id="key-Y" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">Y</div>
+          <div data-key="U" id="key-U" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">U</div>
+          <div data-key="I" id="key-I" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">I</div>
+          <div data-key="O" id="key-O" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">O</div>
+          <div data-key="P" id="key-P" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">P</div>
+          <div data-key="^" id="key-caret" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>¨</span><span class="text-[10px] text-slate-400">^</span></div>
+          <div data-key="$" id="key-dollar" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>£ ¤</span><span class="text-[10px] text-slate-400">$</span></div>
+          <div id="key-Enter" class="key-cap flex-[1.4] bg-slate-700 text-slate-300 rounded-lg p-2 text-right text-xs font-semibold border border-slate-600 flex items-center justify-end pr-2">Entrée</div>
+        </div>
+
+        <!-- Rangée 2 : Q S D F G H... -->
+        <div class="flex gap-1 sm:gap-1.5 w-full">
+          <div id="key-CapsLock" class="key-cap flex-[1.8] bg-slate-700 text-slate-300 rounded-lg p-2 text-left text-xs font-semibold border border-slate-600 flex items-center pl-2">Verr Maj</div>
+          <div data-key="Q" id="key-Q" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">Q</div>
+          <div data-key="S" id="key-S" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">S</div>
+          <div data-key="D" id="key-D" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">D</div>
+          <div data-key="F" id="key-F" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">F</div>
+          <div data-key="G" id="key-G" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">G</div>
+          <div data-key="H" id="key-H" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">H</div>
+          <div data-key="J" id="key-J" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">J</div>
+          <div data-key="K" id="key-K" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">K</div>
+          <div data-key="L" id="key-L" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">L</div>
+          <div data-key="M" id="key-M" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">M</div>
+          <div data-key="ù" id="key-Ugrave" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>%</span><span class="text-[10px] text-slate-400">ù</span></div>
+          <div data-key="*" id="key-Star" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>µ</span><span class="text-[10px] text-slate-400">*</span></div>
+        </div>
+
+        <!-- Rangée 3 : Shift gauche, < W X C V B N... -->
+        <div class="flex gap-1 sm:gap-1.5 w-full">
+          <div id="key-ShiftLeft" class="key-cap flex-[1.4] bg-slate-700 text-slate-300 rounded-lg p-2 text-left text-xs font-semibold border border-slate-600 flex items-center pl-2">⇧ Maj</div>
+          <div data-key="<" id="key-Less" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>&gt;</span><span class="text-[10px] text-slate-400">&lt;</span></div>
+          <div data-key="W" id="key-W" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">W</div>
+          <div data-key="X" id="key-X" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">X</div>
+          <div data-key="C" id="key-C" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">C</div>
+          <div data-key="V" id="key-V" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">V</div>
+          <div data-key="B" id="key-B" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">B</div>
+          <div data-key="N" id="key-N" class="key-cap flex-1 bg-slate-700 text-white rounded-lg p-2 text-center text-sm sm:text-base font-bold border border-slate-600 flex items-center justify-center">N</div>
+          <div data-key="," id="key-Comma" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>?</span><span class="text-[10px] text-slate-400">,</span></div>
+          <div data-key=";" id="key-Semicolon" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>.</span><span class="text-[10px] text-slate-400">;</span></div>
+          <div data-key=":" id="key-Colon" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>/</span><span class="text-[10px] text-slate-400">:</span></div>
+          <div data-key="!" id="key-Excl" class="key-cap flex-1 bg-slate-700 text-slate-200 rounded-lg p-1 sm:p-2 text-center text-xs sm:text-sm border border-slate-600 flex flex-col justify-between h-11 sm:h-12"><span>§</span><span class="text-[10px] text-slate-400">!</span></div>
+          <div id="key-ShiftRight" class="key-cap flex-[2.2] bg-slate-700 text-slate-300 rounded-lg p-2 text-right text-xs font-semibold border border-slate-600 flex items-center justify-end pr-2">⇧ Maj</div>
+        </div>
+
+        <!-- Rangée 4 : Ctrl, Alt, Espace, Alt Gr... -->
+        <div class="flex gap-1 sm:gap-1.5 w-full">
+          <div id="key-ControlLeft" class="key-cap flex-1 bg-slate-700 text-slate-400 rounded-lg p-2 text-center text-xs border border-slate-600 flex items-center justify-center">Ctrl</div>
+          <div id="key-AltLeft" class="key-cap flex-1 bg-slate-700 text-slate-400 rounded-lg p-2 text-center text-xs border border-slate-600 flex items-center justify-center">Alt</div>
+          <div data-key=" " id="key-Space" class="key-cap flex-[6] bg-slate-700 text-slate-400 rounded-lg p-2 text-center text-xs font-semibold border border-slate-600 flex items-center justify-center">Espace</div>
+          <div id="key-AltRight" class="key-cap flex-[1.5] bg-slate-700 text-slate-200 rounded-lg p-2 text-center text-xs font-bold border border-slate-600 flex items-center justify-center">Alt Gr</div>
+          <div id="key-ControlRight" class="key-cap flex-1 bg-slate-700 text-slate-400 rounded-lg p-2 text-center text-xs border border-slate-600 flex items-center justify-center">Ctrl</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Écran Bilan / Fin de Session (Modal) -->
+  <div id="modal-summary" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 flex flex-col gap-6 animate-pop">
+      <div class="text-center">
+        <div class="inline-flex p-4 rounded-2xl bg-emerald-100 text-emerald-600 text-4xl mb-3">
+          🏆
+        </div>
+        <h3 class="text-2xl font-black text-slate-900">Session terminée !</h3>
+        <p class="text-sm text-slate-500 mt-1">Bravo pour tes efforts de saisie !</p>
+      </div>
+
+      <!-- Grille des Résultats -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+          <div class="text-xs font-bold text-slate-400 uppercase">Score final</div>
+          <div id="summary-score" class="text-3xl font-black text-blue-600 mt-1">0</div>
+        </div>
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+          <div class="text-xs font-bold text-slate-400 uppercase">Précision</div>
+          <div id="summary-accuracy" class="text-3xl font-black text-emerald-600 mt-1">100%</div>
+        </div>
+        <div class="col-span-2 bg-indigo-50 p-4 rounded-xl border border-indigo-200 text-center">
+          <div class="text-xs font-bold text-indigo-500 uppercase">Note finale sur 20</div>
+          <div id="summary-grade" class="text-3xl font-black text-indigo-600 mt-1">0 / 20</div>
+        </div>
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+          <div class="text-xs font-bold text-slate-400 uppercase">Réussites</div>
+          <div id="summary-success" class="text-xl font-bold text-slate-700 mt-1">0</div>
+        </div>
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+          <div class="text-xs font-bold text-slate-400 uppercase">Erreurs</div>
+          <div id="summary-errors" class="text-xl font-bold text-rose-600 mt-1">0</div>
+        </div>
+      </div>
+
+      <!-- Section : Touches les plus ratées -->
+      <div class="bg-amber-50 p-4 rounded-xl border border-amber-200">
+        <div class="text-xs font-bold text-amber-800 uppercase mb-2 flex items-center gap-1.5">
+          <span>⚠️ Caractères à réviser</span>
+        </div>
+        <div id="summary-missed-list" class="flex flex-wrap gap-2 text-sm">
+          <!-- Rempli en JS -->
+        </div>
+      </div>
+
+      <!-- Actions finale -->
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button id="btn-summary-replay" class="flex-1 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md transition">
+          🔄 Recommencer ce niveau
+        </button>
+        <button id="btn-summary-next" class="flex-1 py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-md transition">
+          ➡️ Niveau suivant
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT JS PRINCIPAL -->
+  <script>
+    /* =========================================================================
+     * 🛠️ BLOC DE CONFIGURATION ENSEIGNANT (Facilement modifiable)
+     * ========================================================================= */
+    const CONFIG_ENSEIGNANT = {
+      // Paramètres de scoring
+      pointsParReussite: 10,
+      penaliteErreur: 2,
+
+      // Interdire de faire des majuscules via Verr Maj (CapsLock) sans Maj (Shift)
+      bloquerCapsLockPourMajuscules: true,
+
+      // Affichage par défaut du clavier visuel (true = affiché, false = masqué)
+      clavierVisibleParDefaut: true,
+
+      // Mode de sélection des caractères dans le niveau (false = séquentiel, true = aléatoire)
+      modeAleatoire: false,
+
+      // Nombre maximum de questions pour une session complète
+      nombreMaxQuestions: 50,
+
+      // Définition des paliers / niveaux
+      niveaux: [
+        {
+          id: 'tous',
+          nom: '🌟 Parcours global (50 saisies)',
+          description: 'Parcours complet regroupant tous les caractères',
+          caracteres: [] // Généré dynamiquement en regroupant tous les paliers
+        },
+        {
+          id: 'n1',
+          nom: '1. Minuscules simples',
+          description: 'Apprentissage des lettres minuscules',
+          caracteres: ['a','z','e','r','t','y','u','i','o','p','q','s','d','f','g','h','j','k','l','m','w','x','c','v','b','n']
+        },
+        {
+          id: 'n2',
+          nom: '2. Accents courants',
+          description: 'Caractères accentués directs (é, è, à, ç, ù)',
+          caracteres: ['é', 'è', 'à', 'ç', 'ù']
+        },
+        {
+          id: 'n3',
+          nom: '3. Majuscules (Shift / Maj)',
+          description: 'Maintenir la touche Maj pour taper les majuscules',
+          caracteres: ['A','Z','E','R','T','Y','U','I','O','P','Q','S','D','F','G','H','J','K','L','M','W','X','C','V','B','N']
+        },
+        {
+          id: 'n4',
+          nom: '4. Chiffres (Shift + rangée du haut)',
+          description: 'Maintenir Maj et utiliser la rangée du haut',
+          caracteres: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+        },
+        {
+          id: 'n5',
+          nom: '5. Ponctuation et symboles',
+          description: 'Virgule, point-virgule, deux-points, exclamation...',
+          caracteres: [',', ';', ':', '!', '?', '.', '/', '§', '-', '_', '(', ')', '=']
+        },
+        {
+          id: 'n6',
+          nom: '6. Caractères spéciaux (Alt Gr)',
+          description: "Touches nécessitant le maintien d'Alt Gr",
+          caracteres: ['@', '€', '#', '{', '[', '¤', '|', '\\', '^', ']', '}', '~', '`']
+        },
+        {
+          id: 'n7',
+          nom: '7. Toutes les lettres accentuées',
+          description: 'Accents directs, circonflexes (^), trémas (¨) et majuscules accentuées',
+          caracteres: [
+            'é', 'è', 'ê', 'ë',
+            'à', 'â', 'ä',
+            'î', 'ï',
+            'ô', 'ö',
+            'ù', 'û', 'ü',
+            'ç',
+            'É', 'È', 'Ê', 'Ë',
+            'À', 'Â', 'Ä',
+            'Î', 'Ï',
+            'Ô', 'Ö',
+            'Ù', 'Û', 'Ü',
+            'Ç'
+          ]
+        }
+      ]
+    };
+
+    /* =========================================================================
+     * 🗺️ MAPPAGE DES CARACTÈRES VERS TOUCHES AZERTY & MODIFICATEURS
+     * ========================================================================= */
+    const KEY_MAP = {
+      // Minuscules & Touches directes
+      'a': { keyId: 'key-A', mod: 'none', tip: 'Touche A' },
+      'z': { keyId: 'key-Z', mod: 'none', tip: 'Touche Z' },
+      'e': { keyId: 'key-E', mod: 'none', tip: 'Touche E' },
+      'r': { keyId: 'key-R', mod: 'none', tip: 'Touche R' },
+      't': { keyId: 'key-T', mod: 'none', tip: 'Touche T' },
+      'y': { keyId: 'key-Y', mod: 'none', tip: 'Touche Y' },
+      'u': { keyId: 'key-U', mod: 'none', tip: 'Touche U' },
+      'i': { keyId: 'key-I', mod: 'none', tip: 'Touche I' },
+      'o': { keyId: 'key-O', mod: 'none', tip: 'Touche O' },
+      'p': { keyId: 'key-P', mod: 'none', tip: 'Touche P' },
+      'q': { keyId: 'key-Q', mod: 'none', tip: 'Touche Q' },
+      's': { keyId: 'key-S', mod: 'none', tip: 'Touche S' },
+      'd': { keyId: 'key-D', mod: 'none', tip: 'Touche D' },
+      'f': { keyId: 'key-F', mod: 'none', tip: 'Touche F' },
+      'g': { keyId: 'key-G', mod: 'none', tip: 'Touche G' },
+      'h': { keyId: 'key-H', mod: 'none', tip: 'Touche H' },
+      'j': { keyId: 'key-J', mod: 'none', tip: 'Touche J' },
+      'k': { keyId: 'key-K', mod: 'none', tip: 'Touche K' },
+      'l': { keyId: 'key-L', mod: 'none', tip: 'Touche L' },
+      'm': { keyId: 'key-M', mod: 'none', tip: 'Touche M' },
+      'w': { keyId: 'key-W', mod: 'none', tip: 'Touche W' },
+      'x': { keyId: 'key-X', mod: 'none', tip: 'Touche X' },
+      'c': { keyId: 'key-C', mod: 'none', tip: 'Touche C' },
+      'v': { keyId: 'key-V', mod: 'none', tip: 'Touche V' },
+      'b': { keyId: 'key-B', mod: 'none', tip: 'Touche B' },
+      'n': { keyId: 'key-N', mod: 'none', tip: 'Touche N' },
+
+      // Accents directs
+      'é': { keyId: 'key-2', mod: 'none', tip: 'Touche 2 / é' },
+      'è': { keyId: 'key-7', mod: 'none', tip: 'Touche 7 / è' },
+      'à': { keyId: 'key-0', mod: 'none', tip: 'Touche 0 / à' },
+      'ç': { keyId: 'key-9', mod: 'none', tip: 'Touche 9 / ç' },
+      'ù': { keyId: 'key-Ugrave', mod: 'none', tip: 'Touche ù' },
+
+      // Accents circonflexes (Touche ^ puis voyelle)
+      'â': { keyId: 'key-caret', mod: 'none', tip: 'Appuyer sur ^ (à droite du P) puis sur A' },
+      'ê': { keyId: 'key-caret', mod: 'none', tip: 'Appuyer sur ^ (à droite du P) puis sur E' },
+      'î': { keyId: 'key-caret', mod: 'none', tip: 'Appuyer sur ^ (à droite du P) puis sur I' },
+      'ô': { keyId: 'key-caret', mod: 'none', tip: 'Appuyer sur ^ (à droite du P) puis sur O' },
+      'û': { keyId: 'key-caret', mod: 'none', tip: 'Appuyer sur ^ (à droite du P) puis sur U' },
+
+      // Trémas (Maintenir Maj + Touche ¨ puis voyelle)
+      'ä': { keyId: 'key-caret', mod: 'shift', tip: 'Faire Maj + ¨ (à droite du P) puis appuyer sur A' },
+      'ë': { keyId: 'key-caret', mod: 'shift', tip: 'Faire Maj + ¨ (à droite du P) puis appuyer sur E' },
+      'ï': { keyId: 'key-caret', mod: 'shift', tip: 'Faire Maj + ¨ (à droite du P) puis appuyer sur I' },
+      'ö': { keyId: 'key-caret', mod: 'shift', tip: 'Faire Maj + ¨ (à droite du P) puis appuyer sur O' },
+      'ü': { keyId: 'key-caret', mod: 'shift', tip: 'Faire Maj + ¨ (à droite du P) puis appuyer sur U' },
+
+      // Majuscules accentuées (accents directs / touches dédiées)
+      'É': { keyId: 'key-2', mod: 'shift', tip: 'Majuscule É (Maj + 2 ou raccourci système)' },
+      'È': { keyId: 'key-7', mod: 'shift', tip: 'Majuscule È (Maj + 7 ou raccourci système)' },
+      'À': { keyId: 'key-0', mod: 'shift', tip: 'Majuscule À (Maj + 0 ou raccourci système)' },
+      'Ç': { keyId: 'key-9', mod: 'shift', tip: 'Majuscule Ç (Maj + 9 ou raccourci système)' },
+      'Ù': { keyId: 'key-Ugrave', mod: 'shift', tip: 'Majuscule Ù (Maj + ù ou raccourci système)' },
+
+      // Majuscules avec accent circonflexe (^ puis Maj + voyelle)
+      'Â': { keyId: 'key-caret', mod: 'shift', tip: 'Appuyer sur ^ puis Maj + A' },
+      'Ê': { keyId: 'key-caret', mod: 'shift', tip: 'Appuyer sur ^ puis Maj + E' },
+      'Î': { keyId: 'key-caret', mod: 'shift', tip: 'Appuyer sur ^ puis Maj + I' },
+      'Ô': { keyId: 'key-caret', mod: 'shift', tip: 'Appuyer sur ^ puis Maj + O' },
+      'Û': { keyId: 'key-caret', mod: 'shift', tip: 'Appuyer sur ^ puis Maj + U' },
+
+      // Majuscules avec tréma (Maj + ¨ puis Maj + voyelle)
+      'Ä': { keyId: 'key-caret', mod: 'shift', tip: 'Faire Maj + ¨ puis Maj + A' },
+      'Ë': { keyId: 'key-caret', mod: 'shift', tip: 'Faire Maj + ¨ puis Maj + E' },
+      'Ï': { keyId: 'key-caret', mod: 'shift', tip: 'Faire Maj + ¨ puis Maj + I' },
+      'Ö': { keyId: 'key-caret', mod: 'shift', tip: 'Faire Maj + ¨ puis Maj + O' },
+      'Ü': { keyId: 'key-caret', mod: 'shift', tip: 'Faire Maj + ¨ puis Maj + U' },
+
+      // Majuscules
+      'A': { keyId: 'key-A', mod: 'shift', tip: 'Maintenir Maj + Touche A' },
+      'Z': { keyId: 'key-Z', mod: 'shift', tip: 'Maintenir Maj + Touche Z' },
+      'E': { keyId: 'key-E', mod: 'shift', tip: 'Maintenir Maj + Touche E' },
+      'R': { keyId: 'key-R', mod: 'shift', tip: 'Maintenir Maj + Touche R' },
+      'T': { keyId: 'key-T', mod: 'shift', tip: 'Maintenir Maj + Touche T' },
+      'Y': { keyId: 'key-Y', mod: 'shift', tip: 'Maintenir Maj + Touche Y' },
+      'U': { keyId: 'key-U', mod: 'shift', tip: 'Maintenir Maj + Touche U' },
+      'I': { keyId: 'key-I', mod: 'shift', tip: 'Maintenir Maj + Touche I' },
+      'O': { keyId: 'key-O', mod: 'shift', tip: 'Maintenir Maj + Touche O' },
+      'P': { keyId: 'key-P', mod: 'shift', tip: 'Maintenir Maj + Touche P' },
+      'Q': { keyId: 'key-Q', mod: 'shift', tip: 'Maintenir Maj + Touche Q' },
+      'S': { keyId: 'key-S', mod: 'shift', tip: 'Maintenir Maj + Touche S' },
+      'D': { keyId: 'key-D', mod: 'shift', tip: 'Maintenir Maj + Touche D' },
+      'F': { keyId: 'key-F', mod: 'shift', tip: 'Maintenir Maj + Touche F' },
+      'G': { keyId: 'key-G', mod: 'shift', tip: 'Maintenir Maj + Touche G' },
+      'H': { keyId: 'key-H', mod: 'shift', tip: 'Maintenir Maj + Touche H' },
+      'J': { keyId: 'key-J', mod: 'shift', tip: 'Maintenir Maj + Touche J' },
+      'K': { keyId: 'key-K', mod: 'shift', tip: 'Maintenir Maj + Touche K' },
+      'L': { keyId: 'key-L', mod: 'shift', tip: 'Maintenir Maj + Touche L' },
+      'M': { keyId: 'key-M', mod: 'shift', tip: 'Maintenir Maj + Touche M' },
+      'W': { keyId: 'key-W', mod: 'shift', tip: 'Maintenir Maj + Touche W' },
+      'X': { keyId: 'key-X', mod: 'shift', tip: 'Maintenir Maj + Touche X' },
+      'C': { keyId: 'key-C', mod: 'shift', tip: 'Maintenir Maj + Touche C' },
+      'V': { keyId: 'key-V', mod: 'shift', tip: 'Maintenir Maj + Touche V' },
+      'B': { keyId: 'key-B', mod: 'shift', tip: 'Maintenir Maj + Touche B' },
+      'N': { keyId: 'key-N', mod: 'shift', tip: 'Maintenir Maj + Touche N' },
+
+      // Chiffres
+      '1': { keyId: 'key-1', mod: 'shift', tip: 'Maintenir Maj + Touche 1' },
+      '2': { keyId: 'key-2', mod: 'shift', tip: 'Maintenir Maj + Touche 2' },
+      '3': { keyId: 'key-3', mod: 'shift', tip: 'Maintenir Maj + Touche 3' },
+      '4': { keyId: 'key-4', mod: 'shift', tip: 'Maintenir Maj + Touche 4' },
+      '5': { keyId: 'key-5', mod: 'shift', tip: 'Maintenir Maj + Touche 5' },
+      '6': { keyId: 'key-6', mod: 'shift', tip: 'Maintenir Maj + Touche 6' },
+      '7': { keyId: 'key-7', mod: 'shift', tip: 'Maintenir Maj + Touche 7' },
+      '8': { keyId: 'key-8', mod: 'shift', tip: 'Maintenir Maj + Touche 8' },
+      '9': { keyId: 'key-9', mod: 'shift', tip: 'Maintenir Maj + Touche 9' },
+      '0': { keyId: 'key-0', mod: 'shift', tip: 'Maintenir Maj + Touche 0' },
+
+      // Ponctuels & Symboles
+      ',': { keyId: 'key-Comma', mod: 'none', tip: 'Touche Virgule (,)' },
+      ';': { keyId: 'key-Semicolon', mod: 'none', tip: 'Touche Point-virgule (;)' },
+      ':': { keyId: 'key-Colon', mod: 'none', tip: 'Touche Deux-points (:)' },
+      '!': { keyId: 'key-Excl', mod: 'none', tip: "Touche Point d'exclamation (!)" },
+      '?': { keyId: 'key-Comma', mod: 'shift', tip: 'Maintenir Maj + Touche ,' },
+      '.': { keyId: 'key-Semicolon', mod: 'shift', tip: 'Maintenir Maj + Touche ;' },
+      '/': { keyId: 'key-Colon', mod: 'shift', tip: 'Maintenir Maj + Touche :' },
+      '§': { keyId: 'key-Excl', mod: 'shift', tip: 'Maintenir Maj + Touche !' },
+      '-': { keyId: 'key-6', mod: 'none', tip: 'Touche 6 / -' },
+      '_': { keyId: 'key-8', mod: 'none', tip: 'Touche 8 / _' },
+      '(': { keyId: 'key-5', mod: 'none', tip: 'Touche 5 / (' },
+      ')': { keyId: 'key-paren', mod: 'none', tip: 'Touche )' },
+      '=': { keyId: 'key-equal', mod: 'none', tip: 'Touche =' },
+
+      // Alt Gr / Symboles spéciaux
+      '@': { keyId: 'key-0', mod: 'altgr', tip: 'Maintenir Alt Gr + Touche 0 / à' },
+      '€': { keyId: 'key-E', mod: 'altgr', tip: 'Maintenir Alt Gr + Touche E' },
+      '#': { keyId: 'key-3', mod: 'altgr', tip: 'Maintenir Alt Gr + Touche 3 / "' },
+      '{': { keyId: 'key-4', mod: 'altgr', tip: "Maintenir Alt Gr + Touche 4 / '" },
+      '[': { keyId: 'key-5', mod: 'altgr', tip: 'Maintenir Alt Gr + Touche 5 / (' },
+      '|': { keyId: 'key-6', mod: 'altgr', tip: 'Maintenir Alt Gr + Touche 6 / -' },
+      '`': { keyId: 'key-7', mod: 'altgr', tip: 'Maintenir Alt Gr + Touche 7 / è' },
+      '\\': { keyId: 'key-8', mod: 'altgr', tip: 'Maintenir Alt Gr + Touche 8 / _' },
+      '^': { keyId: 'key-9', mod: 'altgr', tip: 'Maintenir Alt Gr + Touche 9 / ç' },
+      ']': { keyId: 'key-paren', mod: 'altgr', tip: 'Maintenir Alt Gr + Touche )' },
+      '}': { keyId: 'key-equal', mod: 'altgr', tip: 'Maintenir Alt Gr + Touche =' },
+      '~': { keyId: 'key-2', mod: 'altgr', tip: 'Maintenir Alt Gr + Touche 2 / é' }
+    };
+
+    /* =========================================================================
+     * 🧠 ÉTAT ET LOGIQUE DE L'APPLICATION
+     * ========================================================================= */
+    let state = {
+      levelIndex: 0,
+      sequence: [],
+      currentIndex: 0,
+      score: 0,
+      successCount: 0,
+      errorCount: 0,
+      missedChars: {},
+      isKeyboardVisible: CONFIG_ENSEIGNANT.clavierVisibleParDefaut,
+      currentTargetChar: ''
+    };
+
+    // Initialisation du parcours global dans CONFIG_ENSEIGNANT
+    (function prepareGlobalLevel() {
+      const allChars = [];
+      CONFIG_ENSEIGNANT.niveaux.forEach(lvl => {
+        if (lvl.id !== 'tous' && lvl.caracteres) {
+          allChars.push(...lvl.caracteres);
+        }
+      });
+      CONFIG_ENSEIGNANT.niveaux[0].caracteres = [...new Set(allChars)];
+    })();
+
+    /* DOM Elements */
+    const selectLevel = document.getElementById('select-level');
+    const btnToggleKeyboard = document.getElementById('btn-toggle-keyboard');
+    const iconKeyboard = document.getElementById('icon-keyboard');
+    const textToggleKeyboard = document.getElementById('text-toggle-keyboard');
+    const btnRestart = document.getElementById('btn-restart');
+    const keyboardContainer = document.getElementById('keyboard-container');
+    const hiddenInput = document.getElementById('hidden-input');
+
+    const badgeLevel = document.getElementById('badge-level');
+    const currentLevelTitle = document.getElementById('current-level-title');
+    const statScore = document.getElementById('stat-score');
+    const statSuccess = document.getElementById('stat-success');
+    const statErrors = document.getElementById('stat-errors');
+    const statAccuracy = document.getElementById('stat-accuracy');
+    const statGrade = document.getElementById('stat-grade');
+    const statProgressText = document.getElementById('stat-progress-text');
+    const progressBar = document.getElementById('progress-bar');
+
+    const instructionText = document.getElementById('instruction-text');
+    const targetCharDisplay = document.getElementById('target-char-display');
+    const userInputDisplay = document.getElementById('user-input-display');
+    const feedbackMessage = document.getElementById('feedback-message');
+    const arenaCard = document.getElementById('arena-card');
+
+    const modalSummary = document.getElementById('modal-summary');
+    const summaryScore = document.getElementById('summary-score');
+    const summaryAccuracy = document.getElementById('summary-accuracy');
+    const summaryGrade = document.getElementById('summary-grade');
+    const summarySuccess = document.getElementById('summary-success');
+    const summaryErrors = document.getElementById('summary-errors');
+    const summaryMissedList = document.getElementById('summary-missed-list');
+    const btnSummaryReplay = document.getElementById('btn-summary-replay');
+    const btnSummaryNext = document.getElementById('btn-summary-next');
+
+    /* =========================================================================
+     * 🚀 INITIALISATION
+     * ========================================================================= */
+    function init() {
+      populateLevelSelect();
+      setupEventListeners();
+      updateKeyboardVisibility();
+      startLevel(0);
+    }
+
+    function populateLevelSelect() {
+      selectLevel.innerHTML = '';
+      CONFIG_ENSEIGNANT.niveaux.forEach((lvl, idx) => {
+        const option = document.createElement('option');
+        option.value = idx;
+        option.textContent = lvl.nom;
+        selectLevel.appendChild(option);
+      });
+    }
+
+    function startLevel(index) {
+      state.levelIndex = index;
+      selectLevel.value = index;
+      const lvlConfig = CONFIG_ENSEIGNANT.niveaux[index];
+
+      // Générer la séquence de questions
+      let list = [...lvlConfig.caracteres];
+      if (CONFIG_ENSEIGNANT.modeAleatoire) {
+        list.sort(() => Math.random() - 0.5);
+      }
+
+      // Limiter le nombre de questions
+      if (list.length > CONFIG_ENSEIGNANT.nombreMaxQuestions) {
+        list = list.slice(0, CONFIG_ENSEIGNANT.nombreMaxQuestions);
+      } else if (list.length < CONFIG_ENSEIGNANT.nombreMaxQuestions && list.length > 0) {
+        // Répéter la liste si nécessaire pour atteindre la longueur souhaitée
+        const originalList = [...list];
+        while (list.length < CONFIG_ENSEIGNANT.nombreMaxQuestions) {
+          list.push(...originalList);
+        }
+        list = list.slice(0, CONFIG_ENSEIGNANT.nombreMaxQuestions);
+      }
+
+      state.sequence = list;
+      state.currentIndex = 0;
+      state.score = 0;
+      state.successCount = 0;
+      state.errorCount = 0;
+      state.missedChars = {};
+
+      currentLevelTitle.textContent = lvlConfig.nom;
+      badgeLevel.textContent = `Niveau ${index === 0 ? 'Global' : index}`;
+
+      modalSummary.classList.add('hidden');
+      updateDashboard();
+      nextQuestion();
+      focusInput();
+    }
+
+    function focusInput() {
+      hiddenInput.focus();
+    }
+
+    /* =========================================================================
+     * 🎯 GESTION DES QUESTIONS ET TOUCHE CIBLE
+     * ========================================================================= */
+    function nextQuestion() {
+      if (state.currentIndex >= state.sequence.length) {
+        showSummary();
+        return;
+      }
+
+      state.currentTargetChar = state.sequence[state.currentIndex];
+      targetCharDisplay.textContent = state.currentTargetChar;
+      userInputDisplay.textContent = '-';
+      userInputDisplay.className = "h-10 px-4 min-w-[80px] bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-center font-mono-code text-xl font-bold text-slate-600";
+      
+      feedbackMessage.textContent = "À toi de jouer !";
+      feedbackMessage.className = "h-6 mt-3 text-sm font-bold text-slate-500 flex items-center gap-1";
+
+      updateKeyHighlights();
+      updateDashboard();
+    }
+
+    function updateKeyHighlights() {
+      // Nettoyer les surbrillances précédentes
+      document.querySelectorAll('.key-cap').forEach(el => {
+        el.classList.remove('key-target', 'key-modifier-target');
+      });
+
+      const charInfo = KEY_MAP[state.currentTargetChar];
+      if (!charInfo) {
+        instructionText.textContent = `Touche pour '${state.currentTargetChar}'`;
+        return;
+      }
+
+      // Mettre à jour l'instruction texte
+      instructionText.textContent = charInfo.tip;
+
+      if (!state.isKeyboardVisible) return;
+
+      // Surligner la touche principale
+      const targetEl = document.getElementById(charInfo.keyId);
+      if (targetEl) {
+        targetEl.classList.add('key-target');
+      }
+
+      // Surligner la touche modificatrice si requise
+      if (charInfo.mod === 'shift') {
+        const shiftLeft = document.getElementById('key-ShiftLeft');
+        const shiftRight = document.getElementById('key-ShiftRight');
+        if (shiftLeft) shiftLeft.classList.add('key-modifier-target');
+        if (shiftRight) shiftRight.classList.add('key-modifier-target');
+      } else if (charInfo.mod === 'altgr') {
+        const altGr = document.getElementById('key-AltRight');
+        if (altGr) altGr.classList.add('key-modifier-target');
+      }
+    }
+
+    /* =========================================================================
+     * ⌨️ TRAITEMENT DE LA SAISIE ÉLÈVE
+     * ========================================================================= */
+    function handleCharacterInput(typedChar) {
+      if (state.currentIndex >= state.sequence.length) return;
+
+      userInputDisplay.textContent = typedChar === ' ' ? 'Espace' : typedChar;
+
+      const isCorrect = (typedChar === state.currentTargetChar);
+
+      if (isCorrect) {
+        // Succès
+        state.score += CONFIG_ENSEIGNANT.pointsParReussite;
+        state.successCount++;
+        feedbackMessage.textContent = "✨ Excellent ! Bonne touche.";
+        feedbackMessage.className = "h-6 mt-3 text-sm font-bold text-emerald-600 flex items-center gap-1 animate-pop";
+        userInputDisplay.className = "h-10 px-4 min-w-[80px] bg-emerald-100 border border-emerald-300 text-emerald-800 rounded-lg flex items-center justify-center font-mono-code text-xl font-bold animate-pop";
+
+        state.currentIndex++;
+        updateDashboard();
+
+        setTimeout(() => {
+          nextQuestion();
+        }, 350);
+
+      } else {
+        // Erreur
+        state.score = Math.max(0, state.score - CONFIG_ENSEIGNANT.penaliteErreur);
+        state.errorCount++;
+
+        // Enregistrer le caractère raté pour le bilan
+        state.missedChars[state.currentTargetChar] = (state.missedChars[state.currentTargetChar] || 0) + 1;
+
+        feedbackMessage.textContent = `❌ Attention, tu as tapé '${typedChar === ' ' ? 'Espace' : typedChar}'. Réessaie !`;
+        feedbackMessage.className = "h-6 mt-3 text-sm font-bold text-rose-600 flex items-center gap-1";
+        userInputDisplay.className = "h-10 px-4 min-w-[80px] bg-rose-100 border border-rose-300 text-rose-800 rounded-lg flex items-center justify-center font-mono-code text-xl font-bold";
+
+        arenaCard.classList.add('animate-shake');
+        setTimeout(() => arenaCard.classList.remove('animate-shake'), 300);
+
+        updateDashboard();
+      }
+    }
+
+    /* =========================================================================
+     * 📊 TABLEAU DE BORD ET STATISTIQUES
+     * ========================================================================= */
+    function updateDashboard() {
+      statScore.textContent = state.score;
+      statSuccess.textContent = state.successCount;
+      statErrors.textContent = state.errorCount;
+
+      const totalAttempts = state.successCount + state.errorCount;
+      const accuracy = totalAttempts > 0 ? Math.round((state.successCount / totalAttempts) * 100) : 100;
+      statAccuracy.textContent = `${accuracy}%`;
+
+      const maxScore = state.sequence.length * CONFIG_ENSEIGNANT.pointsParReussite;
+      const rawGrade = maxScore > 0 ? (state.score / maxScore) * 20 : 0;
+      const formattedGrade = Number.isInteger(rawGrade) ? rawGrade : rawGrade.toFixed(1).replace('.', ',');
+      statGrade.textContent = `${formattedGrade}/20`;
+
+      const progress = state.sequence.length > 0 ? Math.round((state.currentIndex / state.sequence.length) * 100) : 0;
+      progressBar.style.width = `${progress}%`;
+      statProgressText.textContent = `${state.currentIndex} / ${state.sequence.length}`;
+    }
+
+    function showSummary() {
+      summaryScore.textContent = state.score;
+      summarySuccess.textContent = state.successCount;
+      summaryErrors.textContent = state.errorCount;
+
+      const totalAttempts = state.successCount + state.errorCount;
+      const accuracy = totalAttempts > 0 ? Math.round((state.successCount / totalAttempts) * 100) : 100;
+      summaryAccuracy.textContent = `${accuracy}%`;
+
+      const maxScore = state.sequence.length * CONFIG_ENSEIGNANT.pointsParReussite;
+      const rawGrade = maxScore > 0 ? (state.score / maxScore) * 20 : 0;
+      const formattedGrade = Number.isInteger(rawGrade) ? rawGrade : rawGrade.toFixed(1).replace('.', ',');
+      summaryGrade.textContent = `${formattedGrade} / 20`;
+
+      // Remplir les erreurs
+      summaryMissedList.innerHTML = '';
+      const missedKeys = Object.keys(state.missedChars);
+      if (missedKeys.length === 0) {
+        summaryMissedList.innerHTML = '<span class="text-emerald-700 font-medium">Aucune erreur ! Saisie parfaite. 🎉</span>';
+      } else {
+        missedKeys.sort((a, b) => state.missedChars[b] - state.missedChars[a]).forEach(char => {
+          const badge = document.createElement('span');
+          badge.className = 'px-2.5 py-1 bg-white border border-amber-300 rounded-lg font-mono-code font-bold text-slate-800 shadow-sm flex items-center gap-1';
+          badge.innerHTML = `<span class="text-amber-700 font-black">${char === ' ' ? 'Espace' : char}</span> <span class="text-xs text-slate-400">(${state.missedChars[char]}x)</span>`;
+          summaryMissedList.appendChild(badge);
+        });
+      }
+
+      modalSummary.classList.remove('hidden');
+    }
+
+    /* =========================================================================
+     * 👁️ ÉVÉNEMENTIEL ET INTERACTION CLAVIER
+     * ========================================================================= */
+    function setupEventListeners() {
+      // Choix du niveau
+      selectLevel.addEventListener('change', (e) => {
+        startLevel(parseInt(e.target.value, 10));
+      });
+
+      // Toggle affichage du clavier
+      btnToggleKeyboard.addEventListener('click', () => {
+        state.isKeyboardVisible = !state.isKeyboardVisible;
+        updateKeyboardVisibility();
+        updateKeyHighlights();
+        focusInput();
+      });
+
+      // Recommencer
+      btnRestart.addEventListener('click', () => {
+        startLevel(state.levelIndex);
+      });
+
+      // Boutons Bilan
+      btnSummaryReplay.addEventListener('click', () => {
+        startLevel(state.levelIndex);
+      });
+
+      btnSummaryNext.addEventListener('click', () => {
+        const nextIdx = (state.levelIndex + 1) % CONFIG_ENSEIGNANT.niveaux.length;
+        startLevel(nextIdx);
+      });
+
+      // Garder le focus sur le champ de saisie
+      document.addEventListener('click', () => {
+        focusInput();
+      });
+
+      // Écoute de la saisie au clavier physique
+      window.addEventListener('keydown', (e) => {
+        // Empêcher les comportements par défaut gênants (Tab, Espace qui défile, etc.)
+        if (e.key === 'Tab' || e.key === ' ') {
+          e.preventDefault();
+        }
+
+        // Ignorer les touches mortes (ex: ^ ou ¨ en attente de la voyelle suivante)
+        if (e.key === 'Dead') {
+          return;
+        }
+
+        // Prévenir l'utilisation de Verr Maj (CapsLock) pour passer en majuscules
+        if (e.key === 'CapsLock' && CONFIG_ENSEIGNANT.bloquerCapsLockPourMajuscules) {
+          e.preventDefault();
+          feedbackMessage.textContent = "🔒 Utilise la touche Maj (Shift) JAMAIS JAMAIS la touche Verr Maj pour les majuscules !";
+          feedbackMessage.className = "h-6 mt-3 text-sm font-bold text-amber-600 flex items-center gap-1";
+        }
+
+        // Illumination physique de la touche pressée
+        highlightPhysicalKey(e.code, true);
+
+        // Si la touche pressée est un caractère imprimable simple
+        if (e.key.length === 1) {
+          const capsLockActif = e.getModifierState && e.getModifierState('CapsLock');
+          const estMajuscule = /[A-ZÀ-ÖØ-Þ]/.test(e.key) && e.key !== e.key.toLowerCase();
+
+          if (CONFIG_ENSEIGNANT.bloquerCapsLockPourMajuscules && capsLockActif && !e.shiftKey && estMajuscule) {
+            e.preventDefault();
+            userInputDisplay.textContent = e.key;
+            userInputDisplay.className = "h-10 px-4 min-w-[80px] bg-amber-100 border border-amber-300 text-amber-800 rounded-lg flex items-center justify-center font-mono-code text-xl font-bold";
+            feedbackMessage.textContent = "🔒 Verr Maj est activé ! Maintiens la touche Maj (Shift) au lieu de Verr Maj.";
+            feedbackMessage.className = "h-6 mt-3 text-sm font-bold text-amber-600 flex items-center gap-1";
+            return;
+          }
+
+          handleCharacterInput(e.key);
+        }
+      });
+
+      window.addEventListener('keyup', (e) => {
+        highlightPhysicalKey(e.code, false);
+      });
+    }
+
+    function updateKeyboardVisibility() {
+      if (state.isKeyboardVisible) {
+        keyboardContainer.classList.remove('hidden');
+        textToggleKeyboard.textContent = "Masquer le clavier";
+        iconKeyboard.textContent = "👁️";
+      } else {
+        keyboardContainer.classList.add('hidden');
+        textToggleKeyboard.textContent = "Afficher le clavier";
+        iconKeyboard.textContent = "🙈";
+      }
+    }
+
+    function highlightPhysicalKey(code, isPressed) {
+      let keyId = null;
+
+      // Correspondances KeyCode -> ID Element
+      if (code.startsWith('Key')) {
+        const letter = code.replace('Key', '');
+        keyId = `key-${letter}`;
+      } else if (code.startsWith('Digit')) {
+        const digit = code.replace('Digit', '');
+        keyId = `key-${digit}`;
+      } else {
+        const codeMap = {
+          'Space': 'key-Space',
+          'ShiftLeft': 'key-ShiftLeft',
+          'ShiftRight': 'key-ShiftRight',
+          'AltRight': 'key-AltRight',
+          'AltLeft': 'key-AltLeft',
+          'ControlLeft': 'key-ControlLeft',
+          'ControlRight': 'key-ControlRight',
+          'Enter': 'key-Enter',
+          'Backspace': 'key-Backspace',
+          'Tab': 'key-Tab',
+          'CapsLock': 'key-CapsLock'
+        };
+        keyId = codeMap[code] || null;
+      }
+
+      if (keyId) {
+        const el = document.getElementById(keyId);
+        if (el) {
+          if (isPressed) {
+            el.classList.add('key-pressed');
+          } else {
+            el.classList.remove('key-pressed');
+          }
+        }
+      }
+    }
+
+    // Lancer au chargement de la page
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>
