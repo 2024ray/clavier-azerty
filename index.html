@@ -1466,13 +1466,13 @@
       const feedbackEl = document.getElementById('eval-feedback-message');
 
       resetDeadKeyState();
-      state.evalScore = Math.max(0, state.evalScore - 5);
+      state.evalScore = Math.max(0, state.evalScore - 2);
       state.evalErrors++;
       state.evalMissed[rawTarget] = (state.evalMissed[rawTarget] || 0) + 1;
       state.evalAnswersLog.push({
         questionNumber: state.evalIndex + 1,
         expected: rawTarget,
-        answer: 'PASSÉE (-5 pts)',
+        answer: 'PASSÉE (-2 pts)',
         status: 'PASSÉE'
       });
       state.evalIndex++;
